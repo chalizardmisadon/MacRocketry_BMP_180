@@ -7,7 +7,7 @@ This library is rewritten to suit the need and design for McMaster Rocketry Team
 #ifndef MacRocketry_BMP_180_h
 #define MacRocketry_BMP_180_h
 
-#include "Arduino.h" //include Arduino library
+#include <Arduino.h> //include Arduino library
 
 //I2C addresses
 #define BMP180_ADDR 0x77 // default 7-bit address
@@ -33,6 +33,7 @@ enum BMPState {
 class MacRocketry_BMP_180
 {
   public:
+    MacRocketry_BMP_180(void);
     MacRocketry_BMP_180(char oversampling); //set oss
 
     bool begin(void);
@@ -91,15 +92,19 @@ This BMP library is based on MacRocketry_BMP_180.h by Mike Grusin, SparkFun Elec
 This library is rewritten to suit the need and design for McMaster Rocketry Team
 */
 
-#include "Arduino.h"                  //include Arduino library
-//#include <MacRocketry_BMP_Sensor.h>   //include header file
+#include <Arduino.h>                //include Arduino library
+//#include <MacRocketry_BMP_180.h>    //include header file
 #include <Wire.h>   //Wire library needed for I2c
 
 
 //constructor --------------------
-MacRocketry_BMP_180::MacRocketry_BMP_180(char oversampling = 0){ //constructor
+MacRocketry_BMP_180::MacRocketry_BMP_180(){ //constructor
+  MacRocketry_BMP_180(0); //default oss = 0
+}
+
+MacRocketry_BMP_180::MacRocketry_BMP_180(char oversampling){ //constructor
   state = Init;
-  oss = oversampling; //set 0 as default
+  oss = oversampling;
   setSeaLevel_hPa(1013.25); //default sea level
   connectBMP = begin();
 }
