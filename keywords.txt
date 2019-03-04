@@ -1,0 +1,40 @@
+#######################################
+# Syntax Coloring Map for SFE_BMP180
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+MacRocketry_BMP_180	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+readData	KEYWORD2
+
+startTemperature	KEYWORD2
+readTemperature	KEYWORD2
+startPressure	KEYWORD2
+readPressure	KEYWORD2
+
+calcSeaLevel	KEYWORD2
+calcAltitude	KEYWORD2
+getError	KEYWORD2
+
+getConnectBMP	KEYWORD2
+getTemperature	KEYWORD2
+getPressure	KEYWORD2
+getAltitude	KEYWORD2
+
+setSeaLevel_hPa	KEYWORD2
+setSeaLevel_kPaKEYWORD2
+setOversampling	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+BMP180_ADDR	LITERAL1
