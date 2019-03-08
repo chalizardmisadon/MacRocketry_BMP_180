@@ -3,7 +3,6 @@ This BMP library is based on MacRocketry_BMP_180.h by Mike Grusin, SparkFun Elec
 This library is rewritten to suit the need and design for McMaster Rocketry Team
 */
 
-#include <Arduino.h>                //include Arduino library
 #include <MacRocketry_BMP_180.h>    //include header file
 #include <Wire.h>   //Wire library needed for I2c
 
@@ -14,40 +13,20 @@ MacRocketry_BMP_180::MacRocketry_BMP_180(){ //constructor
 }
 
 MacRocketry_BMP_180::MacRocketry_BMP_180(char oversampling){ //constructor
-  state = Init;
+  state = BMP_Init;
   oss = oversampling;
   setSeaLevel_hPa(1013.25); //default sea level
   connectBMP = begin();
 }
 
 //getters and settes --------------------
-bool MacRocketry_BMP_180::getConnectBMP(void){
-  return connectBMP;
-}
-
-float MacRocketry_BMP_180::getTemperature(void){
-  return connectBMP;
-}
-
-float MacRocketry_BMP_180::getPressure(void){
-  return connectBMP;
-}
-
-float MacRocketry_BMP_180::getAltitude(void){
-  return altitude;
-}
-
-void MacRocketry_BMP_180::setSeaLevel_hPa(int p){
-  seaPressure = p;
-}
-
-void MacRocketry_BMP_180::setSeaLevel_kPa(int p){
-  seaPressure = p * 10;
-}
-
-void MacRocketry_BMP_180::setOversampling(char oversampling){
-  oss = oversampling;
-}
+bool MacRocketry_BMP_180::getConnectBMP(void){ return connectBMP; }
+float MacRocketry_BMP_180::getTemperature(void){ return temperature; }
+float MacRocketry_BMP_180::getPressure(void){ return pressure; }
+float MacRocketry_BMP_180::getAltitude(void){ return altitude; }
+void MacRocketry_BMP_180::setSeaLevel_hPa(int p){ seaPressure = p; }
+void MacRocketry_BMP_180::setSeaLevel_kPa(int p){ seaPressure = p * 10; }
+void MacRocketry_BMP_180::setOversampling(char oversampling){ oss = oversampling; }
 
 //initialize BMP and calibration --------------------
 bool MacRocketry_BMP_180::begin(){
@@ -107,32 +86,37 @@ bool MacRocketry_BMP_180::begin(){
 //read BMP data state machine --------------------
 bool MacRocketry_BMP_180::readData(){
   switch (state) {
-    case Init:
-      state = StartTemperature;
-      break;
-      
-    case StartTemperature:
-      waitTimer = millis() + (unsigned long)startTemperature();
-      state = GetTemperature;
-      break;
-      
-    case GetTemperature:
-      if (waitTimer < millis()) state = StartPressure;
-      break;
-      
-    case StartPressure:
+    case BMP_Init:
+      //first temperature reading
+      waitTimer = (unsigned long)startTemperature();
+      delay(waitTimer);
+      readTemperature();
+
+      //switch to looped state
       waitTimer = millis() + (unsigned long)startPressure();
-      state = GetPressure;
+      state = BMP_ReadPressure_StartTemperature;
       break;
       
-    case GetPressure:
-      if (waitTimer < millis()) state = StartTemperature;
-      altitude = calcAltitude(pressure, seaPressure);
-      return true;
+    case BMP_ReadPressure_StartTemperature:
+      if (waitTimer < millis()){
+        readPressure();
+        waitTimer = millis() + (unsigned long)startTemperature();
+        altitude = calcAltitude(pressure, seaPressure);
+        state = BMP_ReadTemperature_StartPressure;
+        return true;
+      }
+      break;
+      
+    case BMP_ReadTemperature_StartPressure:
+      if (waitTimer < millis()){
+        readTemperature();
+        waitTimer = millis() + (unsigned long)startPressure();
+        state = BMP_ReadPressure_StartTemperature;
+      }
       break;
       
     default:
-      state = StartTemperature;
+      state = BMP_Init;
       break;
   }
   return false; //if no new data
