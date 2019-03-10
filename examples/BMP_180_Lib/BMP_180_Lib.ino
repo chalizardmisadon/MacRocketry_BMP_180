@@ -7,6 +7,8 @@ This library is rewritten to suit the need and design for McMaster Rocketry Team
 #ifndef MacRocketry_BMP_180_h
 #define MacRocketry_BMP_180_h
 
+#include <Arduino.h>                //include Arduino library
+
 //I2C addresses
 #define BMP180_ADDR 0x77 // default 7-bit address
 
@@ -87,8 +89,9 @@ This BMP library is based on MacRocketry_BMP_180.h by Mike Grusin, SparkFun Elec
 This library is rewritten to suit the need and design for McMaster Rocketry Team
 */
 
+#include <Arduino.h>                //include Arduino library
 //#include <MacRocketry_BMP_180.h>    //include header file
-#include <Wire.h>   //Wire library needed for I2c
+#include <Wire.h>                   //Wire library needed for I2c
 
 
 //constructor --------------------
