@@ -9,13 +9,9 @@ This library is rewritten to suit the need and design for McMaster Rocketry Team
 
 
 //constructor --------------------
-MacRocketry_BMP_180::MacRocketry_BMP_180(){ //constructor
-  MacRocketry_BMP_180(0); //default oss = 0
-}
-
-MacRocketry_BMP_180::MacRocketry_BMP_180(char oversampling){ //constructor
+MacRocketry_BMP_180::MacRocketry_BMP_180(void){ //constructor
   state = BMP_Init;
-  oss = oversampling;
+  oss = 0;                  //default oversampling
   setSeaLevel_hPa(1013.25); //default sea level
   connectBMP = begin();
 }

@@ -29,8 +29,7 @@ enum BMPState {
 class MacRocketry_BMP_180
 {
   public:
-    MacRocketry_BMP_180(void);
-    MacRocketry_BMP_180(char oversampling); //set oss
+    MacRocketry_BMP_180(void);  //constructor
 
     bool begin(void);
     bool readData(void);
