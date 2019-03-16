@@ -21,11 +21,16 @@ This library is rewritten to suit the need and design for McMaster Rocketry Team
 #define BMP180_COMMAND_PRESSURE_2 0xB4
 #define BMP180_COMMAND_PRESSURE_3 0xF4
 
+//currently will wait for BMP IO to read data
+//uncomment line below to not block arduino from IO
+//#define BMP180_NO_DELAY_READ
+#ifdef BMP180_NO_DELAY_READ
 enum BMPState {
   BMP_Init,
   BMP_ReadPressure_StartTemperature,
   BMP_ReadTemperature_StartPressure
 };
+#endif
 
 class MacRocketry_BMP_180
 {
@@ -74,7 +79,10 @@ class MacRocketry_BMP_180
     char oss; //oversampling setting
     
     unsigned long waitTimer;
+    
+    #ifdef BMP180_NO_DELAY_READ
     BMPState state;
+    #endif
     
     float temperature, pressure, seaPressure, altitude;
 };
@@ -95,10 +103,17 @@ This library is rewritten to suit the need and design for McMaster Rocketry Team
 
 //constructor --------------------
 MacRocketry_BMP_180::MacRocketry_BMP_180(void){ //constructor
+  #ifdef BMP180_NO_DELAY_READ
   state = BMP_Init;
+  #endif
+  
   oss = 0;                  //default oversampling
   setSeaLevel_hPa(1013.25); //default sea level
-  connectBMP = begin();
+  
+  //connectBMP = begin(); //there is a bug where Wire.begin() cannot be called within a class contructor
+  //therefore, we have to call MacRocketry_BMP_180::begin() inside setup() function
+  //so this line above is commented out, and connectBMP is evaluated inside MacRocketry_BMP_180::begin() instead
+
 }
 
 //getters and settes --------------------
@@ -112,6 +127,10 @@ void MacRocketry_BMP_180::setOversampling(char oversampling){ oss = oversampling
 
 //initialize BMP and calibration --------------------
 bool MacRocketry_BMP_180::begin(){
+  //https://github.com/esp8266/Arduino/issues/3570
+  //there is a bug where Wire.begin() cannot be called within a class contructor
+  //therefore, we have to call MacRocketry_BMP_180::begin() inside setup()
+  
   Wire.begin(); //start up the Arduino's "wire" (I2C) library
 
   //retrieve calibration data stored from device
@@ -159,14 +178,18 @@ bool MacRocketry_BMP_180::begin(){
     p1 = 1.0 - 7357.0 * pow(2,-20);
     p2 = 3038.0 * 100.0 * pow(2,-36);
     
-    return(1); //success!
+    connectBMP = true; //success!
+  } else {
+    connectBMP = false; //error reading calibration data; bad component or connection
   }
-  else return(0); //error reading calibration data; bad component or connection
+  return connectBMP;
 }
 
 
 //read BMP data state machine --------------------
 bool MacRocketry_BMP_180::readData(){
+  
+  #ifdef BMP180_NO_DELAY_READ //non blocking readData(), but must call twice
   switch (state) {
     case BMP_Init:
       //first temperature reading
@@ -202,6 +225,15 @@ bool MacRocketry_BMP_180::readData(){
       break;
   }
   return false; //if no new data
+  
+  #else
+  delay(startTemperature());  //delay_block for BMP
+  readTemperature();          //read temperature
+  delay(startPressure());     //delay_block for BMP
+  readPressure();             //read pressure
+  altitude = calcAltitude(pressure, seaPressure);
+  return true;
+  #endif
 }
 
 //functions for reading and writing I2C data from BMP --------------------
@@ -374,7 +406,6 @@ float MacRocketry_BMP_180::calcAltitude(float P, float P0){
   return(44330.0 * (1 - pow(P/P0, 1/5.255)));
 }
 
-
 bool MacRocketry_BMP_180::getError(void){
   //if any library command fails, you can retrieve an extended
   //error code using this command. Errors are from the wire library: 
@@ -393,6 +424,7 @@ MacRocketry_BMP_180 bmp;
 
 void setup() {
   Serial.begin(9600);
+  bmp.begin();
 }
 
 void loop() {
