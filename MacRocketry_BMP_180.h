@@ -20,17 +20,6 @@ This library is rewritten to suit the need and design for McMaster Rocketry Team
 #define BMP180_COMMAND_PRESSURE_2 0xB4
 #define BMP180_COMMAND_PRESSURE_3 0xF4
 
-//currently will wait for BMP IO to read data
-//uncomment line below to not block arduino from IO
-//#define BMP180_NO_DELAY_READ
-#ifdef BMP180_NO_DELAY_READ
-enum BMPState {
-  BMP_Init,
-  BMP_ReadPressure_StartTemperature,
-  BMP_ReadTemperature_StartPressure
-};
-#endif
-
 class MacRocketry_BMP_180
 {
   public:
@@ -53,6 +42,7 @@ class MacRocketry_BMP_180
     float getTemperature(void);
     float getPressure(void);
     float getAltitude(void);
+    uint32_t getTime(void);
     
     void setSeaLevel_hPa(int p);
     void setSeaLevel_kPa(int p);
@@ -77,13 +67,8 @@ class MacRocketry_BMP_180
     bool connectBMP;
     char oss; //oversampling setting
     
-    unsigned long waitTimer;
-    
-    #ifdef BMP180_NO_DELAY_READ
-    BMPState state;
-    #endif
-    
     float temperature, pressure, seaPressure, altitude;
+    uint32_t time;
 };
 
 

@@ -28,6 +28,8 @@ bool MacRocketry_BMP_180::getConnectBMP(void){ return connectBMP; }
 float MacRocketry_BMP_180::getTemperature(void){ return temperature; }
 float MacRocketry_BMP_180::getPressure(void){ return pressure; }
 float MacRocketry_BMP_180::getAltitude(void){ return altitude; }
+uint32_t MacRocketry_BMP_180::getTime(void){ return time; }
+
 void MacRocketry_BMP_180::setSeaLevel_hPa(int p){ seaPressure = p; }
 void MacRocketry_BMP_180::setSeaLevel_kPa(int p){ seaPressure = p * 10; }
 void MacRocketry_BMP_180::setOversampling(char oversampling){ oss = oversampling; }
@@ -95,52 +97,13 @@ bool MacRocketry_BMP_180::begin(){
 
 //read BMP data state machine --------------------
 bool MacRocketry_BMP_180::readData(){
-  
-  #ifdef BMP180_NO_DELAY_READ //non blocking readData(), but must call twice
-  switch (state) {
-    case BMP_Init:
-      //first temperature reading
-      waitTimer = (unsigned long)startTemperature();
-      delay(waitTimer);
-      readTemperature();
-
-      //switch to looped state
-      waitTimer = millis() + (unsigned long)startPressure();
-      state = BMP_ReadPressure_StartTemperature;
-      break;
-      
-    case BMP_ReadPressure_StartTemperature:
-      if (waitTimer < millis()){
-        readPressure();
-        waitTimer = millis() + (unsigned long)startTemperature();
-        altitude = calcAltitude(pressure, seaPressure);
-        state = BMP_ReadTemperature_StartPressure;
-        return true;
-      }
-      break;
-      
-    case BMP_ReadTemperature_StartPressure:
-      if (waitTimer < millis()){
-        readTemperature();
-        waitTimer = millis() + (unsigned long)startPressure();
-        state = BMP_ReadPressure_StartTemperature;
-      }
-      break;
-      
-    default:
-      state = BMP_Init;
-      break;
-  }
-  return false; //if no new data
-  
-  #else
   delay(startTemperature());  //delay_block for BMP
   readTemperature();          //read temperature
   delay(startPressure());     //delay_block for BMP
   readPressure();             //read pressure
+  time = millis();            //set time right away
   altitude = calcAltitude(pressure, seaPressure);
   return true;
-  #endif
 }
 
 //functions for reading and writing I2C data from BMP --------------------
