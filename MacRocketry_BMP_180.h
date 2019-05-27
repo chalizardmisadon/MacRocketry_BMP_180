@@ -20,12 +20,6 @@ This library is rewritten to suit the need and design for McMaster Rocketry Team
 #define BMP180_COMMAND_PRESSURE_2 0xB4
 #define BMP180_COMMAND_PRESSURE_3 0xF4
 
-enum BMPState {
-  BMP_Init,
-  BMP_ReadPressure_StartTemperature,
-  BMP_ReadTemperature_StartPressure
-};
-
 class MacRocketry_BMP_180
 {
   public:
@@ -48,6 +42,7 @@ class MacRocketry_BMP_180
     float getTemperature(void);
     float getPressure(void);
     float getAltitude(void);
+    uint32_t getTime(void);
     
     void setSeaLevel_hPa(int p);
     void setSeaLevel_kPa(int p);
@@ -72,10 +67,8 @@ class MacRocketry_BMP_180
     bool connectBMP;
     char oss; //oversampling setting
     
-    unsigned long waitTimer;
-    BMPState state;
-    
     float temperature, pressure, seaPressure, altitude;
+    uint32_t time;
 };
 
 

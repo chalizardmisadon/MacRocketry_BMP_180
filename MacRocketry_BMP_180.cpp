@@ -10,10 +10,17 @@ This library is rewritten to suit the need and design for McMaster Rocketry Team
 
 //constructor --------------------
 MacRocketry_BMP_180::MacRocketry_BMP_180(void){ //constructor
+  #ifdef BMP180_NO_DELAY_READ
   state = BMP_Init;
+  #endif
+  
   oss = 0;                  //default oversampling
   setSeaLevel_hPa(1013.25); //default sea level
-  connectBMP = begin();
+  
+  //connectBMP = begin(); //there is a bug where Wire.begin() cannot be called within a class contructor
+  //therefore, we have to call MacRocketry_BMP_180::begin() inside setup() function
+  //so this line above is commented out, and connectBMP is evaluated inside MacRocketry_BMP_180::begin() instead
+
 }
 
 //getters and settes --------------------
@@ -21,12 +28,18 @@ bool MacRocketry_BMP_180::getConnectBMP(void){ return connectBMP; }
 float MacRocketry_BMP_180::getTemperature(void){ return temperature; }
 float MacRocketry_BMP_180::getPressure(void){ return pressure; }
 float MacRocketry_BMP_180::getAltitude(void){ return altitude; }
+uint32_t MacRocketry_BMP_180::getTime(void){ return time; }
+
 void MacRocketry_BMP_180::setSeaLevel_hPa(int p){ seaPressure = p; }
 void MacRocketry_BMP_180::setSeaLevel_kPa(int p){ seaPressure = p * 10; }
 void MacRocketry_BMP_180::setOversampling(char oversampling){ oss = oversampling; }
 
 //initialize BMP and calibration --------------------
 bool MacRocketry_BMP_180::begin(){
+  //https://github.com/esp8266/Arduino/issues/3570
+  //there is a bug where Wire.begin() cannot be called within a class contructor
+  //therefore, we have to call MacRocketry_BMP_180::begin() inside setup()
+  
   Wire.begin(); //start up the Arduino's "wire" (I2C) library
 
   //retrieve calibration data stored from device
@@ -74,49 +87,23 @@ bool MacRocketry_BMP_180::begin(){
     p1 = 1.0 - 7357.0 * pow(2,-20);
     p2 = 3038.0 * 100.0 * pow(2,-36);
     
-    return(1); //success!
+    connectBMP = true; //success!
+  } else {
+    connectBMP = false; //error reading calibration data; bad component or connection
   }
-  else return(0); //error reading calibration data; bad component or connection
+  return connectBMP;
 }
 
 
 //read BMP data state machine --------------------
 bool MacRocketry_BMP_180::readData(){
-  switch (state) {
-    case BMP_Init:
-      //first temperature reading
-      waitTimer = (unsigned long)startTemperature();
-      delay(waitTimer);
-      readTemperature();
-
-      //switch to looped state
-      waitTimer = millis() + (unsigned long)startPressure();
-      state = BMP_ReadPressure_StartTemperature;
-      break;
-      
-    case BMP_ReadPressure_StartTemperature:
-      if (waitTimer < millis()){
-        readPressure();
-        waitTimer = millis() + (unsigned long)startTemperature();
-        altitude = calcAltitude(pressure, seaPressure);
-        state = BMP_ReadTemperature_StartPressure;
-        return true;
-      }
-      break;
-      
-    case BMP_ReadTemperature_StartPressure:
-      if (waitTimer < millis()){
-        readTemperature();
-        waitTimer = millis() + (unsigned long)startPressure();
-        state = BMP_ReadPressure_StartTemperature;
-      }
-      break;
-      
-    default:
-      state = BMP_Init;
-      break;
-  }
-  return false; //if no new data
+  delay(startTemperature());  //delay_block for BMP
+  readTemperature();          //read temperature
+  delay(startPressure());     //delay_block for BMP
+  readPressure();             //read pressure
+  time = millis();            //set time right away
+  altitude = calcAltitude(pressure, seaPressure);
+  return true;
 }
 
 //functions for reading and writing I2C data from BMP --------------------
@@ -288,7 +275,6 @@ float MacRocketry_BMP_180::calcAltitude(float P, float P0){
   //return altitude (meters) above baseline
   return(44330.0 * (1 - pow(P/P0, 1/5.255)));
 }
-
 
 bool MacRocketry_BMP_180::getError(void){
   //if any library command fails, you can retrieve an extended
