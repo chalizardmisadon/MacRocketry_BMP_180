@@ -6,6 +6,7 @@ MacRocketry_GPS_Shield gps;
 
 void setup() {
   Serial.begin(9600);
+  while (!Serial); //wait for serial to be initialized
   bmp.begin(); //must call this in setup
 }
 
