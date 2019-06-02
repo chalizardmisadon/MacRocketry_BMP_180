@@ -118,7 +118,7 @@ bool MacRocketry_BMP_180::readBytes(unsigned char *data, char dataLength){
     Wire.requestFrom(BMP180_ADDR, dataLength); //request data
     while(Wire.available() < dataLength); // wait until bytes are ready
     
-    for (char i = 0; i < dataLength; i++){ //start reading
+    for (int i = 0; i < dataLength; i++){ //start reading
       data[i] = Wire.read();
     }
     return(1);
