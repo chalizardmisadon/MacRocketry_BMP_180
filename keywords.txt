@@ -1,5 +1,5 @@
 #######################################
-# Syntax Coloring Map for SFE_BMP180
+# Syntax Coloring Map for MacRocketry_BMP_180
 #######################################
 
 #######################################
@@ -28,9 +28,10 @@ getConnectBMP	KEYWORD2
 getTemperature	KEYWORD2
 getPressure	KEYWORD2
 getAltitude	KEYWORD2
+getTime KEYWORD2
 
 setSeaLevel_hPa	KEYWORD2
-setSeaLevel_kPaKEYWORD2
+setSeaLevel_kPa KEYWORD2
 setOversampling	KEYWORD2
 
 #######################################

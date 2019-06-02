@@ -44,9 +44,9 @@ class MacRocketry_BMP_180
     float getAltitude(void);
     uint32_t getTime(void);
     
-    void setSeaLevel_hPa(int p);
-    void setSeaLevel_kPa(int p);
-    void setOversampling(char oversampling);
+    void setSeaLevel_hPa(float p);
+    void setSeaLevel_kPa(float p);
+    void setOversampling(char sample);
 
     
   private:
