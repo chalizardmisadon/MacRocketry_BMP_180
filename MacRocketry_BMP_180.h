@@ -1,6 +1,6 @@
 /*
-This BMP library is based on SFE_BMP180.h by Mike Grusin, SparkFun Electronics
-This library is rewritten to suit the need and design for McMaster Rocketry Team
+ * This BMP library is based on SFE_BMP180.h by Mike Grusin, SparkFun Electronics
+ * This library is rewritten to suit the need and design for McMaster Rocketry Team
 */
 
 #ifndef MacRocketry_BMP_180_h
