@@ -1,6 +1,6 @@
 /*
-This BMP library is based on SFE_BMP180.h by Mike Grusin, SparkFun Electronics
-This library is rewritten to suit the need and design for McMaster Rocketry Team
+ * This BMP library is based on SFE_BMP180.h by Mike Grusin, SparkFun Electronics
+ * This library is rewritten to suit the need and design for McMaster Rocketry Team
 */
 
 #ifndef MacRocketry_BMP_180_h
@@ -44,9 +44,9 @@ class MacRocketry_BMP_180
     float getAltitude(void);
     uint32_t getTime(void);
     
-    void setSeaLevel_hPa(int p);
-    void setSeaLevel_kPa(int p);
-    void setOversampling(char oversampling);
+    void setSeaLevel_hPa(float p);
+    void setSeaLevel_kPa(float p);
+    void setOversampling(char sample);
 
     
   private:
